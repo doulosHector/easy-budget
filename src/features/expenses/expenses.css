@@ -1,0 +1,38 @@
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.search {
+  position: relative;
+}
+.search svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+.search .input {
+  padding-left: 42px;
+}
+.dates {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+}
+.dates .input {
+  min-height: 42px;
+  font-size: 14px;
+  padding: 0 10px;
+}
+.day {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 18px 2px 8px;
+  display: flex;
+  justify-content: space-between;
+}
