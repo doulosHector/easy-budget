@@ -9,3 +9,7 @@ export const sum = (values: readonly number[]): number =>
 
 export const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value))
+
+/** Formats a number for an `<input type="number">` value. */
+export const toInputValue = (value: number): string =>
+  Number.isInteger(value) ? String(value) : value.toFixed(2)
