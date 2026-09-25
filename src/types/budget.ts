@@ -1,0 +1,44 @@
+import type { CategoryIconName } from '../constants/icons'
+
+/** Month key in `YYYY-MM` format. */
+export type MonthKey = string
+
+/** Calendar date in `YYYY-MM-DD` format. */
+export type DateKey = string
+
+export type ThemePreference = 'system' | 'light' | 'dark'
+
+export interface Category {
+  id: string
+  name: string
+  icon: CategoryIconName
+  color: string
+}
+
+export interface Expense {
+  id: string
+  categoryId: string
+  amount: number
+  concept: string
+  date: DateKey
+  /** Epoch milliseconds, used to order expenses registered on the same day. */
+  createdAt: number
+}
+
+export interface MonthBudget {
+  /** Money available for the month, or `null` when it was never configured. */
+  available: number | null
+  /** Budget per category id. Categories without budget are omitted. */
+  budgets: Record<string, number>
+}
+
+export interface Settings {
+  theme: ThemePreference
+}
+
+export interface BudgetState {
+  categories: Category[]
+  months: Record<MonthKey, MonthBudget>
+  expenses: Expense[]
+  settings: Settings
+}
