@@ -1,0 +1,171 @@
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid transparent;
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn.ghost:hover {
+  background: var(--surface);
+}
+.btn.danger {
+  background: transparent;
+  color: var(--danger);
+  border-color: transparent;
+}
+.btn.full {
+  width: 100%;
+}
+.btn.sm {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 13.5px;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Chips */
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.chip.on {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+.chip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+}
+.chip.sugg {
+  height: 30px;
+  font-size: 12.5px;
+  padding: 0 10px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface2);
+  border-color: transparent;
+}
+.chip.sugg b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Form fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.field > span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface2);
+  color: var(--ink);
+  font-size: 16px;
+}
+.input:focus {
+  border-color: var(--accent);
+  outline: none;
+  background: var(--surface);
+}
+.input.big {
+  font-size: 32px;
+  font-weight: 800;
+  min-height: 64px;
+  letter-spacing: -0.02em;
+}
+.input.big::placeholder {
+  color: var(--muted);
+  font-weight: 700;
+}
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 55%,
+    calc(100% - 14px) 55%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+textarea.input {
+  min-height: 160px;
+  padding: 12px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+/* Segmented control */
+.seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 3px;
+}
+.seg button {
+  min-height: 38px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+}
+.seg button.on {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}

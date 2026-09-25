@@ -1,0 +1,57 @@
+/* Design tokens. Dark values apply with the system preference unless the
+   user forces a theme through `data-theme` on <html>. */
+:root {
+  --bg: #f4f4f1;
+  --surface: #ffffff;
+  --surface2: #ebebe6;
+  --ink: #17191b;
+  --muted: #6b7177;
+  --line: #e1e1dc;
+  --accent: #1e4c5c;
+  --accent-ink: #ffffff;
+  --danger: #b5442c;
+  --danger-soft: #f6e3dc;
+  --ok: #2f8f6f;
+  --shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+
+  --font:
+    'Manrope Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --r: 16px;
+  --r-sm: 10px;
+  --nav-h: 64px;
+  --max-w: 520px;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0f1113;
+    --surface: #181b1e;
+    --surface2: #22262a;
+    --ink: #ecedee;
+    --muted: #8b9197;
+    --line: #2a2f34;
+    --accent: #8fc7bd;
+    --accent-ink: #0e211e;
+    --danger: #e3805f;
+    --danger-soft: #3a241c;
+    --ok: #5fbf9a;
+    --shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0f1113;
+  --surface: #181b1e;
+  --surface2: #22262a;
+  --ink: #ecedee;
+  --muted: #8b9197;
+  --line: #2a2f34;
+  --accent: #8fc7bd;
+  --accent-ink: #0e211e;
+  --danger: #e3805f;
+  --danger-soft: #3a241c;
+  --ok: #5fbf9a;
+  --shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+}
