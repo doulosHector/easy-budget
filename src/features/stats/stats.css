@@ -1,0 +1,152 @@
+/* KPIs */
+.kpi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.kpi span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+.kpi b {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.delta {
+  font-weight: 700;
+  font-size: 13.5px;
+  margin-top: 8px;
+}
+.delta.up {
+  color: var(--danger);
+}
+.delta.down {
+  color: var(--ok);
+}
+
+/* Horizontal bars */
+.hbars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hbar {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.hbar .cat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+.hbar .cat-icon svg {
+  width: 15px;
+  height: 15px;
+}
+.hbar-mid {
+  min-width: 0;
+}
+.hbar-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13.5px;
+  margin-bottom: 5px;
+}
+.hbar-top span:first-child {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hbar-top span:last-child {
+  white-space: nowrap;
+  font-weight: 700;
+}
+.hbar-top span:last-child small {
+  color: var(--muted);
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+/* Daily chart */
+.chart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.chart .grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.chart .avg {
+  stroke: var(--muted);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+.chart text {
+  fill: var(--muted);
+  font-size: 10px;
+  font-family: inherit;
+}
+.chart rect {
+  fill: var(--accent);
+}
+.chart rect.today {
+  fill: var(--ink);
+}
+
+/* Tables */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.tbl td {
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+.tbl tr:first-child td {
+  border-top: 0;
+}
+.tbl td:last-child {
+  text-align: right;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tbl td:last-child small {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 12px;
+}
+.tbl .name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+.tbl .name .cat-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+}
+.tbl .name .cat-icon svg {
+  width: 14px;
+  height: 14px;
+}
+.tbl .name small {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 12px;
+}
+.tbl .name small.count {
+  display: inline;
+  margin-left: 6px;
+}
