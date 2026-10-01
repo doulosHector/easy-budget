@@ -1,17 +1,41 @@
-import { DEFAULT_CATEGORY_ICON } from '../constants/icons'
+import { DEFAULT_CATEGORY_ICON, DEFAULT_GOAL_ICON } from '../constants/icons'
 import { paletteColor } from '../constants/palette'
-import type { BudgetState, Category, MonthBudget } from '../types'
+import type {
+  BudgetState,
+  Category,
+  Goal,
+  MonthBudget,
+  MonthKey,
+} from '../types'
 import { normalizeHeader, parseCsv, toCsv } from '../utils/csv'
 import { isDateKey, isMonthKey } from '../utils/date'
 import { createId } from '../utils/id'
 import { parseAmount } from '../utils/number'
 import { compareExpensesDesc, findCategory } from './budget'
+import { findGoal, getGoalHistory } from './goals'
 
 export const EXPENSES_FILENAME = 'easy-budget-gastos.csv'
 export const BUDGETS_FILENAME = 'easy-budget-presupuestos.csv'
+export const GOALS_FILENAME = 'easy-budget-metas.csv'
 
 const EXPENSE_HEADERS = ['fecha', 'categoria', 'concepto', 'monto']
-const BUDGET_HEADERS = ['mes', 'disponible', 'categoria', 'presupuesto']
+const BUDGET_HEADERS = ['mes', 'disponible', 'tipo', 'nombre', 'presupuesto']
+const GOAL_HEADERS = [
+  'meta',
+  'objetivo',
+  'fecha_limite',
+  'fecha',
+  'tipo',
+  'monto',
+]
+
+/** Values of the `tipo` column in the budgets file. */
+const BUDGET_KIND = { category: 'categoria', goal: 'meta' } as const
+/** Values of the `tipo` column in the goals file. */
+const MOVEMENT_KIND = { in: 'aportacion', out: 'retiro' } as const
+
+const money = (amount: number | null): string =>
+  amount == null ? '' : amount.toFixed(2)
 
 /** All expenses, oldest first. */
 export const exportExpensesCsv = (state: BudgetState): string =>
@@ -27,19 +51,51 @@ export const exportExpensesCsv = (state: BudgetState): string =>
       ]),
   ])
 
-/** One row per month and category budget (or one row for months without). */
+/**
+ * One row per month and category budget or goal plan (`tipo` tells them
+ * apart), or a single row for months without any.
+ */
 export const exportBudgetsCsv = (state: BudgetState): string => {
   const rows: string[][] = [BUDGET_HEADERS]
   for (const month of Object.keys(state.months).sort()) {
-    const { available, budgets } = state.months[month]
-    const availableText = available == null ? '' : available.toFixed(2)
-    const ids = Object.keys(budgets)
-    if (!ids.length) rows.push([month, availableText, '', ''])
-    for (const id of ids) {
-      const category = findCategory(state.categories, id)
-      if (category) {
-        rows.push([month, availableText, category.name, budgets[id].toFixed(2)])
-      }
+    const { available, budgets, goals } = state.months[month]
+    const prefix = [month, money(available)]
+    const monthRows = [
+      ...Object.entries(budgets).flatMap(([id, amount]) => {
+        const category = findCategory(state.categories, id)
+        return category
+          ? [[BUDGET_KIND.category, category.name, money(amount)]]
+          : []
+      }),
+      ...Object.entries(goals).flatMap(([id, amount]) => {
+        const goal = findGoal(state.goals, id)
+        return goal ? [[BUDGET_KIND.goal, goal.name, money(amount)]] : []
+      }),
+    ]
+    if (!monthRows.length) rows.push([...prefix, '', '', ''])
+    for (const row of monthRows) rows.push([...prefix, ...row])
+  }
+  return toCsv(rows)
+}
+
+/**
+ * One row per goal movement, oldest first, with `monto` always positive and
+ * `tipo` telling contributions from withdrawals. A goal without movements
+ * still gets one row, so it is not lost.
+ */
+export const exportGoalsCsv = (state: BudgetState): string => {
+  const rows: string[][] = [GOAL_HEADERS]
+  for (const goal of state.goals) {
+    const prefix = [goal.name, money(goal.target), goal.deadline ?? '']
+    const history = getGoalHistory(state.contributions, goal.id).reverse()
+    if (!history.length) rows.push([...prefix, '', '', ''])
+    for (const { date, amount } of history) {
+      rows.push([
+        ...prefix,
+        date,
+        amount > 0 ? MOVEMENT_KIND.in : MOVEMENT_KIND.out,
+        money(Math.abs(amount)),
+      ])
     }
   }
   return toCsv(rows)
@@ -48,6 +104,7 @@ export const exportBudgetsCsv = (state: BudgetState): string => {
 export type ImportResult =
   | { kind: 'expenses'; added: number; skipped: number }
   | { kind: 'budgets'; rows: number }
+  | { kind: 'goals'; goals: number; added: number; skipped: number }
   | { kind: 'empty' }
   | { kind: 'unknown' }
 
@@ -71,12 +128,45 @@ const findOrCreateCategory = (
   return category
 }
 
+/**
+ * Finds a goal by name (case-insensitive) or creates it. An existing goal
+ * gets the target or deadline it was missing.
+ */
+const findOrCreateGoal = (
+  draft: BudgetState,
+  name: string,
+  details: { target?: number | null; deadline?: MonthKey | null } = {},
+): { goal: Goal; created: boolean } => {
+  const target = details.target ?? null
+  const deadline = details.deadline ?? null
+  const existing = draft.goals.find(
+    (g) => g.name.toLowerCase() === name.toLowerCase(),
+  )
+  if (existing) {
+    existing.target ??= target
+    existing.deadline ??= deadline
+    return { goal: existing, created: false }
+  }
+  const goal: Goal = {
+    id: createId(),
+    name,
+    target,
+    deadline,
+    icon: DEFAULT_GOAL_ICON,
+    color: paletteColor(draft.goals.length),
+    createdAt: Date.now(),
+  }
+  draft.goals.push(goal)
+  return { goal, created: true }
+}
+
 const ensureMonth = (draft: BudgetState, month: string): MonthBudget =>
   (draft.months[month] ??= { available: null, budgets: {}, goals: {} })
 
 /**
- * Imports a CSV previously exported by the app (expenses or budgets).
- * Unknown categories are created; duplicated expenses are skipped.
+ * Imports a CSV previously exported by the app (expenses, budgets or goals).
+ * Unknown categories and goals are created; duplicated expenses and goal
+ * movements are skipped.
  * Returns a new state, leaving the given one untouched.
  */
 export const importCsv = (
@@ -91,6 +181,68 @@ export const importCsv = (
   const cell = (row: string[], index: number) =>
     index >= 0 ? (row[index] ?? '').trim() : ''
   const draft = structuredClone(state)
+
+  // Checked first: a goals file also has `fecha` and `monto` columns.
+  if (column('meta') >= 0 && column('monto') >= 0) {
+    const [name, target, deadline, date, kind, amount] =
+      GOAL_HEADERS.map(column)
+    const created = new Set<string>()
+    let added = 0
+    let skipped = 0
+    for (const row of rows.slice(1)) {
+      const goalName = cell(row, name)
+      if (!goalName) {
+        skipped++
+        continue
+      }
+      const targetValue = parseAmount(cell(row, target))
+      const deadlineText = cell(row, deadline)
+      const { goal, created: isNew } = findOrCreateGoal(draft, goalName, {
+        target: targetValue > 0 ? targetValue : null,
+        deadline: isMonthKey(deadlineText) ? deadlineText : null,
+      })
+      if (isNew) created.add(goal.id)
+
+      const movementDate = cell(row, date)
+      const amountText = cell(row, amount)
+      // A row without a movement only carries the goal itself.
+      if (!movementDate && !amountText) continue
+      const value = parseAmount(amountText)
+      const movementKind = normalizeHeader(cell(row, kind))
+      if (
+        !isDateKey(movementDate) ||
+        value <= 0 ||
+        (movementKind !== MOVEMENT_KIND.in &&
+          movementKind !== MOVEMENT_KIND.out)
+      ) {
+        skipped++
+        continue
+      }
+      const signed = movementKind === MOVEMENT_KIND.out ? -value : value
+      const duplicated = draft.contributions.some(
+        (c) =>
+          c.goalId === goal.id &&
+          c.date === movementDate &&
+          Math.abs(c.amount - signed) < 0.005,
+      )
+      if (duplicated) {
+        skipped++
+        continue
+      }
+      draft.contributions.push({
+        id: createId(),
+        goalId: goal.id,
+        amount: signed,
+        date: movementDate,
+        createdAt: Date.now(),
+      })
+      added++
+    }
+    return {
+      state: draft,
+      result: { kind: 'goals', goals: created.size, added, skipped },
+    }
+  }
 
   if (column('fecha') >= 0 && column('monto') >= 0) {
     const [date, category, concept, amount] = EXPENSE_HEADERS.map(column)
@@ -132,7 +284,10 @@ export const importCsv = (
   }
 
   if (column('mes') >= 0) {
-    const [month, available, category, budget] = BUDGET_HEADERS.map(column)
+    const [month, available, kind, name, budget] = BUDGET_HEADERS.map(column)
+    // Files exported before goals existed have `categoria` instead of
+    // `tipo` + `nombre`.
+    const legacyCategory = column('categoria')
     let imported = 0
     for (const row of rows.slice(1)) {
       const monthKey = cell(row, month)
@@ -140,9 +295,18 @@ export const importCsv = (
       const target = ensureMonth(draft, monthKey)
       const availableText = cell(row, available)
       if (availableText !== '') target.available = parseAmount(availableText)
-      const budgetCategory = findOrCreateCategory(draft, cell(row, category))
       const value = parseAmount(cell(row, budget))
-      if (budgetCategory && value > 0) target.budgets[budgetCategory.id] = value
+      const itemName = cell(row, name >= 0 ? name : legacyCategory)
+      if (normalizeHeader(cell(row, kind)) === BUDGET_KIND.goal) {
+        if (itemName && value > 0) {
+          target.goals[findOrCreateGoal(draft, itemName).goal.id] = value
+        }
+      } else {
+        const budgetCategory = findOrCreateCategory(draft, itemName)
+        if (budgetCategory && value > 0) {
+          target.budgets[budgetCategory.id] = value
+        }
+      }
       imported++
     }
     return { state: draft, result: { kind: 'budgets', rows: imported } }

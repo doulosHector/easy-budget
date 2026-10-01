@@ -5,12 +5,15 @@ import { useUi } from '../../../context/ui'
 import {
   BUDGETS_FILENAME,
   EXPENSES_FILENAME,
+  GOALS_FILENAME,
   exportBudgetsCsv,
   exportExpensesCsv,
+  exportGoalsCsv,
   importCsv,
   type ImportResult,
 } from '../../../services/backup'
 import { downloadTextFile } from '../../../utils/download'
+import { pluralize } from '../../../utils/format'
 import { SettingRow } from './SettingRow'
 
 const importMessage = (result: ImportResult): string => {
@@ -21,6 +24,18 @@ const importMessage = (result: ImportResult): string => {
       }`
     case 'budgets':
       return `${result.rows} filas de presupuesto importadas`
+    case 'goals': {
+      const parts = [
+        `${result.added} ${pluralize(result.added, 'movimiento importado', 'movimientos importados')}`,
+      ]
+      if (result.goals) {
+        parts.push(
+          `${result.goals} ${pluralize(result.goals, 'meta nueva', 'metas nuevas')}`,
+        )
+      }
+      if (result.skipped) parts.push(`${result.skipped} omitidos`)
+      return parts.join(', ')
+    }
     case 'empty':
       return 'El archivo está vacío'
     case 'unknown':
@@ -71,7 +86,7 @@ export function BackupCard() {
       </SettingRow>
       <SettingRow
         title="Exportar presupuestos"
-        description="Disponible y presupuesto por categoría de cada mes"
+        description="Disponible, presupuesto por categoría y plan por meta de cada mes"
       >
         <button
           className="btn ghost sm"
@@ -81,8 +96,19 @@ export function BackupCard() {
         </button>
       </SettingRow>
       <SettingRow
+        title="Exportar metas"
+        description="Metas con todas sus aportaciones y retiros"
+      >
+        <button
+          className="btn ghost sm"
+          onClick={() => exportFile(GOALS_FILENAME, exportGoalsCsv(state))}
+        >
+          Exportar
+        </button>
+      </SettingRow>
+      <SettingRow
         title="Importar CSV"
-        description="Acepta archivos de gastos o de presupuestos exportados desde aquí"
+        description="Acepta archivos de gastos, presupuestos o metas exportados desde aquí"
       >
         <button
           className="btn ghost sm"

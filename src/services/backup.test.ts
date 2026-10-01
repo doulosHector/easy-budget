@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { budgetState, category, expense, month } from '../test/factories'
-import { exportBudgetsCsv, exportExpensesCsv, importCsv } from './backup'
+import {
+  budgetState,
+  category,
+  contribution,
+  expense,
+  goal,
+  month,
+} from '../test/factories'
+import {
+  exportBudgetsCsv,
+  exportExpensesCsv,
+  exportGoalsCsv,
+  importCsv,
+} from './backup'
+
+const lines = (csv: string) => csv.replace('\uFEFF', '').split('\r\n')
 
 describe('expenses CSV', () => {
   const state = budgetState({
@@ -82,5 +96,91 @@ describe('importCsv', () => {
     const unknown = importCsv(state, 'foo,bar\n1,2')
     expect(unknown.result).toEqual({ kind: 'unknown' })
     expect(unknown.state).toBe(state)
+  })
+})
+
+describe('budgets CSV with goal plans', () => {
+  const state = budgetState({
+    goals: [goal()],
+    months: {
+      '2026-09': month({
+        available: 21000,
+        budgets: { 'cat-food': 5000 },
+        goals: { 'goal-trip': 2000 },
+      }),
+    },
+  })
+
+  it('tells category budgets from goal plans with the tipo column', () => {
+    expect(lines(exportBudgetsCsv(state))).toEqual([
+      'mes,disponible,tipo,nombre,presupuesto',
+      '2026-09,21000.00,categoria,Comida,5000.00',
+      '2026-09,21000.00,meta,Viaje,2000.00',
+    ])
+  })
+
+  it('round-trips goal plans, creating missing goals', () => {
+    const target = budgetState({ categories: [] })
+    const { state: imported } = importCsv(target, exportBudgetsCsv(state))
+    const trip = imported.goals.find((g) => g.name === 'Viaje')!
+    expect(imported.months['2026-09'].goals).toEqual({ [trip.id]: 2000 })
+  })
+
+  it('still accepts the format exported before goals existed', () => {
+    const csv = 'mes,disponible,categoria,presupuesto\n2026-09,1000,Comida,400'
+    const { state: imported, result } = importCsv(budgetState(), csv)
+    expect(result).toEqual({ kind: 'budgets', rows: 1 })
+    expect(imported.months['2026-09']).toEqual(
+      month({ available: 1000, budgets: { 'cat-food': 400 } }),
+    )
+  })
+})
+
+describe('goals CSV', () => {
+  const state = budgetState({
+    goals: [
+      goal(),
+      goal({ id: 'goal-fund', name: 'Fondo', target: null, deadline: null }),
+    ],
+    contributions: [
+      contribution({ amount: -300, date: '2026-09-20', createdAt: 2 }),
+      contribution({ amount: 1000, date: '2026-09-02' }),
+    ],
+  })
+
+  it('exports one row per movement and one for goals without movements', () => {
+    expect(lines(exportGoalsCsv(state))).toEqual([
+      'meta,objetivo,fecha_limite,fecha,tipo,monto',
+      'Viaje,12000.00,2026-12,2026-09-02,aportacion,1000.00',
+      'Viaje,12000.00,2026-12,2026-09-20,retiro,300.00',
+      'Fondo,,,,,',
+    ])
+  })
+
+  it('round-trips goals and signed movements into an empty state', () => {
+    const empty = budgetState({ categories: [] })
+    const { state: imported, result } = importCsv(empty, exportGoalsCsv(state))
+    expect(result).toEqual({ kind: 'goals', goals: 2, added: 2, skipped: 0 })
+    expect(imported.goals.map((g) => [g.name, g.target, g.deadline])).toEqual([
+      ['Viaje', 12000, '2026-12'],
+      ['Fondo', null, null],
+    ])
+    expect(imported.contributions.map((c) => c.amount)).toEqual([1000, -300])
+  })
+
+  it('skips duplicates and fills in what an existing goal was missing', () => {
+    const existing = budgetState({
+      goals: [goal({ target: null, deadline: null })],
+      contributions: [contribution({ amount: 1000, date: '2026-09-02' })],
+    })
+    const { state: imported, result } = importCsv(
+      existing,
+      exportGoalsCsv(state),
+    )
+    expect(result).toEqual({ kind: 'goals', goals: 1, added: 1, skipped: 1 })
+    expect(imported.goals[0]).toMatchObject({
+      target: 12000,
+      deadline: '2026-12',
+    })
   })
 })
