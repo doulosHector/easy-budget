@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../../../components/ui'
 import { useBudget } from '../../../context/budget'
 import { useToast } from '../../../context/toast'
 import { pluralize } from '../../../utils/format'
@@ -10,10 +11,6 @@ export function DataCard() {
   const expenses = state.expenses.length
 
   const handleReset = () => {
-    const confirmed = window.confirm(
-      '¿Borrar todos los datos de Easy Budget en este dispositivo? No se puede deshacer.',
-    )
-    if (!confirmed) return
     actions.resetState()
     showToast('Datos borrados')
   }
@@ -29,9 +26,13 @@ export function DataCard() {
         title="Borrar todo"
         description="Elimina categorías, presupuestos y gastos"
       >
-        <button className="btn danger sm" onClick={handleReset}>
+        <ConfirmButton
+          className="btn danger sm"
+          confirmLabel="¿Seguro?"
+          onConfirm={handleReset}
+        >
           Borrar
-        </button>
+        </ConfirmButton>
       </SettingRow>
     </div>
   )

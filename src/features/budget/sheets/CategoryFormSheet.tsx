@@ -1,5 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import { CategoryIcon, SheetContent, SvgIcon } from '../../../components/ui'
+import {
+  CategoryIcon,
+  ConfirmButton,
+  SheetContent,
+  SvgIcon,
+} from '../../../components/ui'
 import {
   CATEGORY_ICON_NAMES,
   CATEGORY_ICONS,
@@ -67,10 +72,6 @@ export function CategoryFormSheet({
 
   const handleDelete = () => {
     if (!existing) return
-    const message = `¿Eliminar "${existing.name}"${
-      expenseCount ? ` y sus ${expensesText}` : ''
-    }? Esta acción no se puede deshacer.`
-    if (!window.confirm(message)) return
     actions.deleteCategory(existing.id)
     closeSheet()
     showToast('Categoría eliminada')
@@ -151,9 +152,13 @@ export function CategoryFormSheet({
         </button>
       </form>
       {existing && (
-        <button className="btn danger full mt" onClick={handleDelete}>
+        <ConfirmButton
+          className="btn danger full mt"
+          confirmLabel="Toca otra vez para eliminar: no se puede deshacer"
+          onConfirm={handleDelete}
+        >
           Eliminar categoría{expenseCount > 0 && ` y sus ${expensesText}`}
-        </button>
+        </ConfirmButton>
       )}
     </SheetContent>
   )

@@ -1,5 +1,6 @@
 export { BottomSheet, SheetContent } from './BottomSheet'
 export { CategoryIcon } from './CategoryIcon'
+export { ConfirmButton } from './ConfirmButton'
 export { EmptyState } from './EmptyState'
 export { Icon, SvgIcon } from './Icon'
 export { ProgressBar } from './ProgressBar'

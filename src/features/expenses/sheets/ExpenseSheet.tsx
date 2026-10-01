@@ -1,5 +1,5 @@
 import { useId, useMemo, useState, type FormEvent } from 'react'
-import { SheetContent } from '../../../components/ui'
+import { ConfirmButton, SheetContent } from '../../../components/ui'
 import { useBudget } from '../../../context/budget'
 import { useToast } from '../../../context/toast'
 import { useUi } from '../../../context/ui'
@@ -113,9 +113,13 @@ export function ExpenseSheet({ expenseId }: { expenseId: string }) {
           Guardar cambios
         </button>
       </form>
-      <button className="btn danger full mt" onClick={handleDelete}>
+      <ConfirmButton
+        className="btn danger full mt"
+        confirmLabel="Toca otra vez para eliminar"
+        onConfirm={handleDelete}
+      >
         Eliminar gasto
-      </button>
+      </ConfirmButton>
     </SheetContent>
   )
 }

@@ -26,6 +26,10 @@
   color: var(--danger);
   border-color: transparent;
 }
+.btn.danger.armed {
+  background: var(--danger);
+  color: var(--bg);
+}
 .btn.full {
   width: 100%;
 }
