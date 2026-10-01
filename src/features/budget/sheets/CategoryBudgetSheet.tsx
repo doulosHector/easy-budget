@@ -10,7 +10,8 @@ import {
 } from '../../../services/budget'
 import { monthLabel } from '../../../utils/date'
 import { parseAmount, toInputValue } from '../../../utils/number'
-import { SuggestionChips } from '../components/SuggestionChips'
+import { SuggestionChips } from '../../../components/SuggestionChips'
+import { categorySuggestionOptions } from '../suggestions'
 
 /** Sets the budget of a single category for the browsed month. */
 export function CategoryBudgetSheet({ categoryId }: { categoryId: string }) {
@@ -48,7 +49,9 @@ export function CategoryBudgetSheet({ categoryId }: { categoryId: string }) {
           />
         </label>
         <SuggestionChips
-          suggestions={getSuggestions(state, month, categoryId)}
+          options={categorySuggestionOptions(
+            getSuggestions(state, month, categoryId),
+          )}
           onPick={(value) => setAmount(toInputValue(value))}
         />
         <button className="btn full mt" type="submit">

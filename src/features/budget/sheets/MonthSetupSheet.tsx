@@ -12,7 +12,8 @@ import {
 import { monthLabel, shiftMonth } from '../../../utils/date'
 import { formatMoney } from '../../../utils/format'
 import { parseAmount, sum, toInputValue } from '../../../utils/number'
-import { SuggestionChips } from '../components/SuggestionChips'
+import { SuggestionChips } from '../../../components/SuggestionChips'
+import { categorySuggestionOptions } from '../suggestions'
 import '../budget.css'
 
 const APPLY_ALL: { kind: SuggestionKind; label: string }[] = [
@@ -148,7 +149,7 @@ export function MonthSetupSheet() {
                   onChange={(e) => setBudget(category.id, e.target.value)}
                 />
                 <SuggestionChips
-                  suggestions={suggestions[category.id]}
+                  options={categorySuggestionOptions(suggestions[category.id])}
                   onPick={(value) =>
                     setBudget(category.id, toInputValue(value))
                   }

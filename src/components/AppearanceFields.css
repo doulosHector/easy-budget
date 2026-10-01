@@ -1,0 +1,50 @@
+/* Icon/color pickers and the live preview above them */
+.preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.preview .cat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+.preview b {
+  font-size: 18px;
+}
+.icongrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.icongrid button {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface2);
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+}
+.icongrid button.on {
+  border-color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.colorgrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.colorgrid button {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--c);
+  border: 3px solid transparent;
+}
+.colorgrid button.on {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--bg);
+}
