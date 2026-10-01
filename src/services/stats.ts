@@ -1,6 +1,15 @@
-import type { Category, DateKey, Expense, MonthKey } from '../types'
+import type {
+  BudgetState,
+  Category,
+  DateKey,
+  Expense,
+  MonthKey,
+} from '../types'
 import { dayOfMonth, daysInMonth, monthOf, shiftMonth } from '../utils/date'
+import { sum } from '../utils/number'
+import { getMonthBalance } from './balance'
 import { getSpending, type Spending } from './budget'
+import { getGoalsPlanned, getSavings } from './goals'
 
 export interface MonthSummary {
   spent: number
@@ -153,4 +162,35 @@ export const getMonthlyAverages = (
     })
     .sort((a, b) => b.total - a.total)
   return { months, total, rows }
+}
+
+export interface SavingsSummary {
+  saved: number
+  withdrawn: number
+  planned: number
+  /** Balance of all goals together. */
+  total: number
+  /**
+   * Rounded share of the month's available money that went into goals, or
+   * `null` when the month has no available money configured.
+   */
+  savedPercent: number | null
+}
+
+export const getSavingsSummary = (
+  state: BudgetState,
+  month: MonthKey,
+): SavingsSummary => {
+  const { saved, withdrawn } = getSavings(state.contributions, month)
+  const { configured, available } = getMonthBalance(state, month)
+  return {
+    saved,
+    withdrawn,
+    planned: getGoalsPlanned(state, month),
+    total: sum(state.contributions.map((c) => c.amount)),
+    savedPercent:
+      configured != null && available > 0
+        ? Math.round((saved / available) * 100)
+        : null,
+  }
 }

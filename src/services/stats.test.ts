@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { category, expense } from '../test/factories'
+import {
+  budgetState,
+  category,
+  contribution,
+  expense,
+  goal,
+  month,
+} from '../test/factories'
 import {
   elapsedDays,
   getDailySpending,
   getMonthlyAverages,
   getMonthSummary,
+  getSavingsSummary,
   getTopConcepts,
 } from './stats'
 
@@ -78,5 +86,30 @@ describe('getMonthlyAverages', () => {
     expect(result.rows).toEqual([
       { category: category(), total: 300, activeMonths: 2 },
     ])
+  })
+})
+
+describe('getSavingsSummary', () => {
+  it('summarizes the month savings and the total kept in goals', () => {
+    const state = budgetState({
+      goals: [goal()],
+      months: {
+        '2026-09': month({ available: 9500, goals: { 'goal-trip': 1500 } }),
+      },
+      contributions: [
+        contribution({ amount: 4000, date: '2026-08-01' }),
+        contribution({ amount: 1000 }),
+        contribution({ amount: -500 }),
+      ],
+    })
+    expect(getSavingsSummary(state, '2026-09')).toEqual({
+      saved: 1000,
+      withdrawn: 500,
+      planned: 1500,
+      total: 4500,
+      // 1000 saved out of 9500 configured + 500 withdrawn.
+      savedPercent: 10,
+    })
+    expect(getSavingsSummary(state, '2026-10').savedPercent).toBeNull()
   })
 })
