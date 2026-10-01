@@ -1,28 +1,25 @@
-import { Icon, ProgressBar } from '../../../components/ui'
-import { useBudget } from '../../../context/budget'
+import { Icon, StackedBar } from '../../../components/ui'
 import { useUi } from '../../../context/ui'
-import { useSpending } from '../../../hooks/useSpending'
-import { getAssignedTotal, getMonth } from '../../../services/budget'
+import { useMonthBalance } from '../../../hooks/useMonthBalance'
 import { monthLabel } from '../../../utils/date'
 import { formatMoney } from '../../../utils/format'
 import { cx } from '../../../utils/style'
 import { monthStatusHint } from '../monthStatus'
 
 export function BudgetHero() {
-  const { state } = useBudget()
   const { month, openSheet } = useUi()
-  const { total: spent } = useSpending(month)
-  const { available } = getMonth(state, month)
+  const balance = useMonthBalance(month)
   const openSetup = () => openSheet({ type: 'monthSetup' })
 
-  if (available == null) {
+  if (balance.configured == null) {
     return (
       <section className="hero empty">
         <h2>Sin presupuesto para {monthLabel(month).toLowerCase()}</h2>
         <p>
           Define cuánto dinero tienes disponible y repártelo entre tus
-          categorías.
-          {spent > 0 && ` Ya llevas ${formatMoney(spent)} gastados.`}
+          categorías y metas de ahorro.
+          {balance.spent > 0 &&
+            ` Ya llevas ${formatMoney(balance.spent)} gastados.`}
         </p>
         <button className="btn" onClick={openSetup}>
           Configurar mes
@@ -31,9 +28,9 @@ export function BudgetHero() {
     )
   }
 
-  const assigned = getAssignedTotal(state, month)
-  const left = available - spent
-  const percent = available > 0 ? (spent / available) * 100 : 0
+  const { available, assigned, spent, saved, withdrawn, used, left } = balance
+  const percentOf = (amount: number) =>
+    available > 0 ? (amount / available) * 100 : 0
 
   return (
     <section className="hero">
@@ -41,16 +38,30 @@ export function BudgetHero() {
       <p className={cx('hero-amount', left < 0 && 'neg')}>
         {formatMoney(Math.abs(left))}
       </p>
-      <ProgressBar value={percent} over={spent > available} />
+      <StackedBar
+        over={used > available}
+        segments={[
+          { value: percentOf(spent) },
+          { value: percentOf(saved), className: 'save' },
+        ]}
+      />
       <div className="hero-meta">
         <span>
           Disponible<b>{formatMoney(available)}</b>
+          {withdrawn > 0 && (
+            <small>incluye {formatMoney(withdrawn)} retirados</small>
+          )}
         </span>
         <span>
           Asignado<b>{formatMoney(assigned)}</b>
         </span>
         <span>
+          <i className="dot spent" aria-hidden="true" />
           Gastado<b>{formatMoney(spent)}</b>
+        </span>
+        <span>
+          <i className="dot save" aria-hidden="true" />
+          Ahorrado<b>{formatMoney(saved)}</b>
         </span>
       </div>
       {assigned > available && (

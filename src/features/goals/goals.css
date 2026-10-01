@@ -1,0 +1,19 @@
+.goal-done {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+/* Movement history in the goal sheet */
+.movement .item-amt.in {
+  color: var(--save);
+}
+.movement .btn.sm {
+  min-height: 32px;
+  padding: 0 12px;
+}
+.goal-direction {
+  margin-bottom: 14px;
+}
+.goal-form-hint {
+  margin: -6px 0 14px;
+}

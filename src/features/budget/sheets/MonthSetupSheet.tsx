@@ -9,6 +9,12 @@ import {
   getSuggestions,
   type SuggestionKind,
 } from '../../../services/budget'
+import {
+  getGoalPlan,
+  getGoalSuggestions,
+  getSavings,
+} from '../../../services/goals'
+import { goalSuggestionOptions } from '../../goals'
 import { monthLabel, shiftMonth } from '../../../utils/date'
 import { formatMoney } from '../../../utils/format'
 import { parseAmount, sum, toInputValue } from '../../../utils/number'
@@ -27,7 +33,7 @@ export function MonthSetupSheet() {
   const { state, actions } = useBudget()
   const { month, closeSheet } = useUi()
   const { showToast } = useToast()
-  const { categories } = state
+  const { categories, goals } = state
   const current = getMonth(state, month)
   const previous = getMonth(state, shiftMonth(month, -1))
 
@@ -42,6 +48,25 @@ export function MonthSetupSheet() {
       }),
     ),
   )
+  const [plans, setPlans] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      goals.map((g) => {
+        const plan = getGoalPlan(state, month, g.id)
+        return [g.id, plan ? toInputValue(plan) : '']
+      }),
+    ),
+  )
+  const goalSuggestions = useMemo(
+    () =>
+      Object.fromEntries(
+        goals.map((g) => [g.id, getGoalSuggestions(state, month, g.id)]),
+      ),
+    [state, goals, month],
+  )
+  const { withdrawn } = useMemo(
+    () => getSavings(state.contributions, month),
+    [state.contributions, month],
+  )
   const suggestions = useMemo(
     () =>
       Object.fromEntries(
@@ -50,12 +75,18 @@ export function MonthSetupSheet() {
     [state, categories, month],
   )
 
-  const availableAmount = parseAmount(available)
-  const assigned = sum(Object.values(budgets).map(parseAmount))
+  // Withdrawals from goals add to the money of the month (see BudgetHero).
+  const availableAmount = parseAmount(available) + withdrawn
+  const assigned =
+    sum(Object.values(budgets).map(parseAmount)) +
+    sum(Object.values(plans).map(parseAmount))
 
   const setBudget = (categoryId: string, value: string) =>
     setBudgets((current) => ({ ...current, [categoryId]: value }))
+  const setPlan = (goalId: string, value: string) =>
+    setPlans((current) => ({ ...current, [goalId]: value }))
 
+  /** Only categories: goal plans always stay a manual decision. */
   const applyToAll = (kind: SuggestionKind) =>
     setBudgets(
       Object.fromEntries(
@@ -70,9 +101,12 @@ export function MonthSetupSheet() {
     event.preventDefault()
     actions.saveMonth(
       month,
-      available.trim() === '' ? null : availableAmount,
+      available.trim() === '' ? null : parseAmount(available),
       Object.fromEntries(
         Object.entries(budgets).map(([id, value]) => [id, parseAmount(value)]),
+      ),
+      Object.fromEntries(
+        Object.entries(plans).map(([id, value]) => [id, parseAmount(value)]),
       ),
     )
     closeSheet()
@@ -115,7 +149,7 @@ export function MonthSetupSheet() {
         <div className="sec-title">
           <h2>Presupuesto por categoría</h2>
         </div>
-        <p className="hint apply-all-label">Aplicar a todas:</p>
+        <p className="hint apply-all-label">Aplicar a todas las categorías:</p>
         <div className="chips apply-all">
           {APPLY_ALL.map(({ kind, label }) => (
             <button
@@ -163,6 +197,39 @@ export function MonthSetupSheet() {
           )}
         </div>
 
+        {goals.length > 0 && (
+          <>
+            <div className="sec-title">
+              <h2>Metas de ahorro</h2>
+            </div>
+            <div>
+              {goals.map((goal) => (
+                <div className="mrow" key={goal.id}>
+                  <div className="name">
+                    <CategoryIcon category={goal} size={16} />
+                    <span>{goal.name}</span>
+                  </div>
+                  <input
+                    className="input"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    aria-label={`Plan para ${goal.name}`}
+                    value={plans[goal.id] ?? ''}
+                    onChange={(e) => setPlan(goal.id, e.target.value)}
+                  />
+                  <SuggestionChips
+                    options={goalSuggestionOptions(goalSuggestions[goal.id])}
+                    onPick={(value) => setPlan(goal.id, toInputValue(value))}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
         <p className="summary">
           Asignado <b>{formatMoney(assigned)}</b> de{' '}
           <b>{formatMoney(availableAmount)}</b>
@@ -178,6 +245,12 @@ export function MonthSetupSheet() {
             ` · quedan ${formatMoney(availableAmount - assigned)} sin asignar`
           )}
         </p>
+        {withdrawn > 0 && (
+          <p className="hint">
+            El disponible incluye {formatMoney(withdrawn)} que retiraste de tus
+            metas este mes.
+          </p>
+        )}
         <button className="btn full mt" type="submit">
           Guardar mes
         </button>

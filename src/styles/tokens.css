@@ -12,6 +12,8 @@
   --danger: #b5442c;
   --danger-soft: #f6e3dc;
   --ok: #2f8f6f;
+  /* Savings; distinct from --ok and --accent in both themes */
+  --save: #6c56c9;
   --shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
 
   --font:
@@ -37,6 +39,7 @@
     --danger: #e3805f;
     --danger-soft: #3a241c;
     --ok: #5fbf9a;
+    --save: #a99bf0;
     --shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
   }
 }
@@ -53,5 +56,6 @@
   --danger: #e3805f;
   --danger-soft: #3a241c;
   --ok: #5fbf9a;
+  --save: #a99bf0;
   --shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
 }

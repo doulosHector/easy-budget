@@ -7,6 +7,7 @@ import {
   MonthSetupSheet,
 } from '../features/budget'
 import { ExpenseSheet } from '../features/expenses'
+import { GoalFormSheet, GoalPlanSheet, GoalSheet } from '../features/goals'
 import { CsvFallbackSheet } from '../features/settings'
 import type { SheetState } from '../types'
 
@@ -22,6 +23,12 @@ function SheetBody({ sheet }: { sheet: SheetState }) {
       return <MonthSetupSheet />
     case 'expense':
       return <ExpenseSheet expenseId={sheet.expenseId} />
+    case 'goal':
+      return <GoalSheet goalId={sheet.goalId} />
+    case 'goalPlan':
+      return <GoalPlanSheet goalId={sheet.goalId} />
+    case 'goalForm':
+      return <GoalFormSheet goalId={sheet.goalId} />
     case 'csvFallback':
       return <CsvFallbackSheet filename={sheet.filename} data={sheet.data} />
   }

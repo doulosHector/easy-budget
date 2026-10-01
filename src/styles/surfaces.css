@@ -40,6 +40,16 @@
 .bar > span.over {
   background: var(--danger);
 }
+.bar.stacked {
+  display: flex;
+}
+.bar.stacked > span {
+  flex: none;
+  border-radius: 0;
+}
+.bar > span.save {
+  background: var(--save);
+}
 
 /* Category icon badge; `--c` is the category color */
 .cat-icon {

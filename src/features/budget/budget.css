@@ -22,10 +22,10 @@
   color: var(--danger);
 }
 .hero-meta {
-  display: flex;
-  gap: 4px;
-  justify-content: space-between;
-  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  margin-top: 14px;
   font-size: 13px;
   color: var(--muted);
 }
@@ -33,7 +33,23 @@
   display: block;
   color: var(--ink);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
+}
+.hero-meta small {
+  display: block;
+  font-size: 12px;
+}
+/* Legend dots matching the stacked bar */
+.hero-meta .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  background: var(--accent);
+}
+.hero-meta .dot.save {
+  background: var(--save);
 }
 .hero-actions {
   display: flex;

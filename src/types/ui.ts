@@ -17,4 +17,7 @@ export type SheetState =
   | { type: 'categoryForm'; categoryId: string | null }
   | { type: 'monthSetup' }
   | { type: 'expense'; expenseId: string }
+  | { type: 'goal'; goalId: string }
+  | { type: 'goalPlan'; goalId: string }
+  | { type: 'goalForm'; goalId: string | null }
   | { type: 'csvFallback'; filename: string; data: string }

@@ -3,6 +3,7 @@ import { useBudget } from '../../context/budget'
 import { useUi } from '../../context/ui'
 import { useSpending } from '../../hooks/useSpending'
 import { getCategoryBudget } from '../../services/budget'
+import { GoalsSection } from '../goals'
 import { BudgetHero } from './components/BudgetHero'
 import { CategoryCard } from './components/CategoryCard'
 import './budget.css'
@@ -45,6 +46,7 @@ export function BudgetView() {
       >
         <Icon name="plus" size={18} strokeWidth={2.2} /> Nueva categoría
       </button>
+      <GoalsSection />
     </>
   )
 }
