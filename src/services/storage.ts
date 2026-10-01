@@ -1,13 +1,19 @@
-import { DEFAULT_CATEGORY_ICON, isCategoryIconName } from '../constants/icons'
+import {
+  DEFAULT_CATEGORY_ICON,
+  DEFAULT_GOAL_ICON,
+  isCategoryIconName,
+} from '../constants/icons'
 import { paletteColor } from '../constants/palette'
 import type {
   BudgetState,
   Category,
+  Contribution,
   Expense,
+  Goal,
   MonthBudget,
   ThemePreference,
 } from '../types'
-import { isDateKey } from '../utils/date'
+import { isDateKey, isMonthKey } from '../utils/date'
 import { createDefaultState } from './defaults'
 
 /** Same key as the original single-file app, so existing data keeps working. */
@@ -51,16 +57,55 @@ const toExpense = (raw: unknown): Expense | null => {
   }
 }
 
-const toMonth = (raw: unknown): MonthBudget => {
-  const month: MonthBudget = { available: null, budgets: {} }
-  if (!isRecord(raw)) return month
-  if (isFiniteNumber(raw.available)) month.available = raw.available
-  if (isRecord(raw.budgets)) {
-    for (const [id, value] of Object.entries(raw.budgets)) {
-      if (isFiniteNumber(value) && value > 0) month.budgets[id] = value
-    }
+const toGoal = (raw: unknown, index: number): Goal | null => {
+  if (!isRecord(raw) || typeof raw.id !== 'string') return null
+  if (typeof raw.name !== 'string' || !raw.name.trim()) return null
+  return {
+    id: raw.id,
+    name: raw.name,
+    target: isFiniteNumber(raw.target) && raw.target > 0 ? raw.target : null,
+    deadline:
+      typeof raw.deadline === 'string' && isMonthKey(raw.deadline)
+        ? raw.deadline
+        : null,
+    icon: isCategoryIconName(raw.icon) ? raw.icon : DEFAULT_GOAL_ICON,
+    color: typeof raw.color === 'string' ? raw.color : paletteColor(index),
+    createdAt: isFiniteNumber(raw.createdAt) ? raw.createdAt : 0,
   }
-  return month
+}
+
+const toContribution = (raw: unknown): Contribution | null => {
+  if (!isRecord(raw) || typeof raw.id !== 'string') return null
+  if (typeof raw.goalId !== 'string') return null
+  if (!isFiniteNumber(raw.amount) || raw.amount === 0) return null
+  if (typeof raw.date !== 'string' || !isDateKey(raw.date)) return null
+  return {
+    id: raw.id,
+    goalId: raw.goalId,
+    amount: raw.amount,
+    date: raw.date,
+    createdAt: isFiniteNumber(raw.createdAt) ? raw.createdAt : 0,
+  }
+}
+
+/** Keeps only the positive amounts of an `{ id: amount }` record. */
+const toAmounts = (raw: unknown): Record<string, number> => {
+  const amounts: Record<string, number> = {}
+  if (!isRecord(raw)) return amounts
+  for (const [id, value] of Object.entries(raw)) {
+    if (isFiniteNumber(value) && value > 0) amounts[id] = value
+  }
+  return amounts
+}
+
+const toMonth = (raw: unknown): MonthBudget => {
+  if (!isRecord(raw)) return { available: null, budgets: {}, goals: {} }
+  return {
+    available: isFiniteNumber(raw.available) ? raw.available : null,
+    budgets: toAmounts(raw.budgets),
+    // Months saved before savings goals existed have no `goals`.
+    goals: toAmounts(raw.goals),
+  }
 }
 
 const notNull = <T>(value: T | null): value is T => value !== null
@@ -78,11 +123,23 @@ export const normalizeState = (raw: unknown): BudgetState | null => {
     }
   }
   const settings = isRecord(raw.settings) ? raw.settings : {}
+  // Data saved before savings goals existed has no `goals`/`contributions`.
+  const goals = Array.isArray(raw.goals)
+    ? raw.goals.map(toGoal).filter(notNull)
+    : []
+  const goalIds = new Set(goals.map((g) => g.id))
   return {
     categories: raw.categories.map(toCategory).filter(notNull),
     months,
     expenses: Array.isArray(raw.expenses)
       ? raw.expenses.map(toExpense).filter(notNull)
+      : [],
+    goals,
+    contributions: Array.isArray(raw.contributions)
+      ? raw.contributions
+          .map(toContribution)
+          .filter(notNull)
+          .filter((c) => goalIds.has(c.goalId))
       : [],
     settings: {
       theme: THEMES.includes(settings.theme as ThemePreference)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { budgetState, category, expense } from '../test/factories'
+import { budgetState, category, expense, month } from '../test/factories'
 import { exportBudgetsCsv, exportExpensesCsv, importCsv } from './backup'
 
 describe('expenses CSV', () => {
@@ -47,11 +47,11 @@ describe('budgets CSV', () => {
     const state = budgetState({
       categories: [category(), category({ id: 'cat-home', name: 'Casa' })],
       months: {
-        '2026-08': { available: 20000, budgets: {} },
-        '2026-09': {
+        '2026-08': month({ available: 20000, budgets: {} }),
+        '2026-09': month({
           available: 21000,
           budgets: { 'cat-food': 5000, 'cat-home': 8000 },
-        },
+        }),
       },
     })
     const target = budgetState({ categories: [category({ id: 'other-id' })] })
@@ -64,11 +64,13 @@ describe('budgets CSV', () => {
     expect(imported.months['2026-08']).toEqual({
       available: 20000,
       budgets: {},
+      goals: {},
     })
     const home = imported.categories.find((c) => c.name === 'Casa')!
     expect(imported.months['2026-09']).toEqual({
       available: 21000,
       budgets: { 'other-id': 5000, [home.id]: 8000 },
+      goals: {},
     })
   })
 })

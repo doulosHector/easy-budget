@@ -72,7 +72,7 @@ const findOrCreateCategory = (
 }
 
 const ensureMonth = (draft: BudgetState, month: string): MonthBudget =>
-  (draft.months[month] ??= { available: null, budgets: {} })
+  (draft.months[month] ??= { available: null, budgets: {}, goals: {} })
 
 /**
  * Imports a CSV previously exported by the app (expenses or budgets).

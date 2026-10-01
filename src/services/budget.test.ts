@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { budgetState, expense } from '../test/factories'
+import { budgetState, expense, month } from '../test/factories'
 import {
   filterExpenses,
   getAssignedTotal,
@@ -26,9 +26,9 @@ describe('getSuggestions', () => {
   it('suggests last budget, 3-month average and last remainder', () => {
     const state = budgetState({
       months: {
-        '2026-06': { available: null, budgets: { 'cat-food': 300 } },
-        '2026-07': { available: null, budgets: {} },
-        '2026-08': { available: null, budgets: { 'cat-food': 500 } },
+        '2026-06': month({ available: null, budgets: { 'cat-food': 300 } }),
+        '2026-07': month({ available: null, budgets: {} }),
+        '2026-08': month({ available: null, budgets: { 'cat-food': 500 } }),
       },
       expenses: [expense({ amount: 120, date: '2026-08-15' })],
     })
@@ -44,7 +44,10 @@ describe('getAssignedTotal', () => {
   it('ignores budgets of categories that no longer exist', () => {
     const state = budgetState({
       months: {
-        '2026-09': { available: 1000, budgets: { 'cat-food': 300, gone: 50 } },
+        '2026-09': month({
+          available: 1000,
+          budgets: { 'cat-food': 300, gone: 50 },
+        }),
       },
     })
     expect(getAssignedTotal(state, '2026-09')).toBe(300)

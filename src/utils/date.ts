@@ -27,6 +27,13 @@ export const shiftMonth = (month: MonthKey, delta: number): MonthKey => {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}`
 }
 
+/** Whole months from `from` to `to` (negative when `to` is earlier). */
+export const monthsBetween = (from: MonthKey, to: MonthKey): number => {
+  const [fromYear, fromMonth] = parseMonth(from)
+  const [toYear, toMonth] = parseMonth(to)
+  return (toYear - fromYear) * 12 + (toMonth - fromMonth)
+}
+
 export const daysInMonth = (month: MonthKey): number => {
   const [year, monthNumber] = parseMonth(month)
   return new Date(year, monthNumber, 0).getDate()

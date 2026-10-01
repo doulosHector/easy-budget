@@ -12,6 +12,7 @@ import { sum } from '../utils/number'
 const EMPTY_MONTH: MonthBudget = Object.freeze({
   available: null,
   budgets: Object.freeze({}),
+  goals: Object.freeze({}),
 }) as MonthBudget
 
 export interface Spending {

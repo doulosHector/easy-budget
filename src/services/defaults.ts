@@ -13,5 +13,7 @@ export const createDefaultState = (): BudgetState => ({
   categories: createDefaultCategories(),
   months: {},
   expenses: [],
+  goals: [],
+  contributions: [],
   settings: { theme: 'system' },
 })
