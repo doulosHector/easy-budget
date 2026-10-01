@@ -1,8 +1,8 @@
 # Easy Budget
 
 A simple monthly budget app by category, built as an offline-first **PWA**.
-Set how much money you have each month, split it across categories, and log
-expenses in a couple of taps. The UI is in Spanish (es-MX, MXN).
+Set how much money you have each month, split it across categories and
+savings goals, and log expenses in a couple of taps. The UI is in Spanish (es-MX, MXN).
 
 All data is stored **only on the device** (`localStorage`). There is no
 backend and no account.
@@ -12,12 +12,17 @@ backend and no account.
 - **Budget**: money available per month, budget per category, progress
   bars, overspend warnings and suggestions (last month, 3-month average,
   last month's remainder).
+- **Savings goals**: goals with an optional target and deadline,
+  contributions and withdrawals, a monthly plan per goal with suggestions
+  (last month's plan, and the amount that reaches the target on time).
+  Saving uses the month's money without counting as spending; a withdrawal
+  adds to what is available.
 - **Expenses**: quick entry from each category, search by concept, filter
   by category and date range, edit and delete.
 - **Statistics**: month summary vs. previous month, spending by category,
-  daily chart, top concepts and 12-month average per category.
-- **Settings**: light/dark/system theme, CSV export/import (expenses and
-  budgets) and data reset.
+  daily chart, top concepts, 12-month average per category and savings.
+- **Settings**: light/dark/system theme, CSV export/import (expenses,
+  budgets and goals) and data reset. Deleting asks for a second tap.
 - **PWA**: installable, works offline, updates automatically.
 
 ## Tech stack
@@ -62,10 +67,11 @@ src/
 ├── features/       # One folder per screen, with its components and sheets
 │   ├── budget/
 │   ├── expenses/
+│   ├── goals/      # Savings goals section and sheets (on the budget screen)
 │   ├── settings/
 │   └── stats/
 ├── hooks/          # Shared hooks
-├── services/       # Pure business logic: budget, stats, backup, storage
+├── services/       # Pure business logic: budget, goals, balance, stats, backup, storage
 ├── styles/         # Design tokens and global styles
 ├── test/           # Test factories
 ├── types/          # Domain and UI types
@@ -73,7 +79,8 @@ src/
 ```
 
 - **State** lives in a reducer (`context/budget`) and is saved to
-  `localStorage` on every change. Stored data is validated when loaded.
+  `localStorage` on every change. Stored data is validated when loaded, and
+  data saved by older versions (without goals) is migrated automatically.
 - **Business logic** is kept in pure functions under `services/` so it is
   easy to test; components only render and dispatch actions.
 - **Styles** use CSS custom properties for theming; each component or
@@ -102,3 +109,7 @@ BASE_PATH=/easy-budget/ npm run build
 Data from the original `Easy Budget.html` lives in that page's browser
 storage. To move it, use **Ajustes → Exportar** in the old version and
 **Ajustes → Importar CSV** here (import the expenses and the budgets files).
+
+The budgets CSV now has the columns `mes, disponible, tipo, nombre,
+presupuesto` (`tipo` is `categoria` or `meta`). Files in the old format
+(`mes, disponible, categoria, presupuesto`) still import.
