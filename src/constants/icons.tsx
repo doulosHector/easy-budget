@@ -27,7 +27,8 @@ export const CATEGORY_ICONS = {
     <>
       <path d="M5 3v18" />
       <path d="M3 3v5a2 2 0 004 0V3" />
-      <path d="M16 3c-2 0-3 2-3 5s1 4 3 4v9" />
+      <ellipse cx="16.5" cy="7" rx="3" ry="4" />
+      <path d="M16.5 11v10" />
     </>
   ),
   coffee: (
