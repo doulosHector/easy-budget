@@ -14,7 +14,7 @@ import { useBudget } from '../../../context/budget'
 import { useToast } from '../../../context/toast'
 import { useUi } from '../../../context/ui'
 import { findGoal } from '../../../services/goals'
-import { isMonthKey, monthLabel } from '../../../utils/date'
+import { isDateKey, monthLabel } from '../../../utils/date'
 import { pluralize } from '../../../utils/format'
 import { parseAmount, toInputValue } from '../../../utils/number'
 import '../goals.css'
@@ -53,8 +53,8 @@ export function GoalFormSheet({ goalId }: { goalId: string | null }) {
       showToast('Escribe un nombre')
       return
     }
-    if (deadline && !isMonthKey(deadline)) {
-      showToast('Escribe la fecha límite como AAAA-MM')
+    if (deadline && !isDateKey(deadline)) {
+      showToast('Elige una fecha límite válida')
       return
     }
     const targetAmount = parseAmount(target)
@@ -119,8 +119,7 @@ export function GoalFormSheet({ goalId }: { goalId: string | null }) {
             <span>Fecha límite</span>
             <input
               className="input"
-              type="month"
-              placeholder="AAAA-MM"
+              type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
             />

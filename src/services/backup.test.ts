@@ -151,8 +151,8 @@ describe('goals CSV', () => {
   it('exports one row per movement and one for goals without movements', () => {
     expect(lines(exportGoalsCsv(state))).toEqual([
       'meta,objetivo,fecha_limite,fecha,tipo,monto',
-      'Viaje,12000.00,2026-12,2026-09-02,aportacion,1000.00',
-      'Viaje,12000.00,2026-12,2026-09-20,retiro,300.00',
+      'Viaje,12000.00,2026-12-31,2026-09-02,aportacion,1000.00',
+      'Viaje,12000.00,2026-12-31,2026-09-20,retiro,300.00',
       'Fondo,,,,,',
     ])
   })
@@ -162,7 +162,7 @@ describe('goals CSV', () => {
     const { state: imported, result } = importCsv(empty, exportGoalsCsv(state))
     expect(result).toEqual({ kind: 'goals', goals: 2, added: 2, skipped: 0 })
     expect(imported.goals.map((g) => [g.name, g.target, g.deadline])).toEqual([
-      ['Viaje', 12000, '2026-12'],
+      ['Viaje', 12000, '2026-12-31'],
       ['Fondo', null, null],
     ])
     expect(imported.contributions.map((c) => c.amount)).toEqual([1000, -300])
@@ -180,7 +180,14 @@ describe('goals CSV', () => {
     expect(result).toEqual({ kind: 'goals', goals: 1, added: 1, skipped: 1 })
     expect(imported.goals[0]).toMatchObject({
       target: 12000,
-      deadline: '2026-12',
+      deadline: '2026-12-31',
     })
+  })
+
+  it('reads month deadlines from files exported by the first goals version', () => {
+    const csv =
+      'meta,objetivo,fecha_limite,fecha,tipo,monto\nAuto,50000,2027-06,,,'
+    const { state: imported } = importCsv(budgetState(), csv)
+    expect(imported.goals[0].deadline).toBe('2027-06-30')
   })
 })

@@ -95,4 +95,12 @@ describe('normalizeState with savings goals', () => {
     expect(state?.contributions.map((c) => c.id)).toEqual(['c1'])
     expect(state?.months['2026-09'].goals).toEqual({ g1: 300 })
   })
+
+  it('turns month deadlines saved by the first goals version into dates', () => {
+    const state = normalizeState({
+      categories: [],
+      goals: [{ id: 'g1', name: 'Viaje', deadline: '2026-02' }],
+    })
+    expect(state?.goals[0].deadline).toBe('2026-02-28')
+  })
 })

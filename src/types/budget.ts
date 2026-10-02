@@ -31,8 +31,8 @@ export interface Goal {
   name: string
   /** Amount to reach, or `null` for an open-ended goal. */
   target: number | null
-  /** Month the target should be reached by, if any. */
-  deadline: MonthKey | null
+  /** Day the target should be reached by, if any. */
+  deadline: DateKey | null
   icon: CategoryIconName
   color: string
   createdAt: number

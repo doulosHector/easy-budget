@@ -10,7 +10,7 @@ import {
   getGoalSuggestions,
   monthsLeft,
 } from '../../../services/goals'
-import { monthLabel } from '../../../utils/date'
+import { dateLong, monthLabel } from '../../../utils/date'
 import { formatMoney, pluralize } from '../../../utils/format'
 import { parseAmount, toInputValue } from '../../../utils/number'
 import { goalSuggestionOptions } from '../suggestions'
@@ -59,9 +59,9 @@ export function GoalPlanSheet({ goalId }: { goalId: string }) {
         />
         {suggestions.onTime != null && goal.deadline && (
           <p className="hint mt">
-            Para llegar a la meta en {monthLabel(goal.deadline).toLowerCase()}{' '}
-            necesitas apartar {formatMoney(suggestions.onTime)} al mes durante{' '}
-            {months} {pluralize(months, 'mes', 'meses')}.
+            Para llegar a la meta el {dateLong(goal.deadline)} necesitas apartar{' '}
+            {formatMoney(suggestions.onTime)} al mes durante {months}{' '}
+            {pluralize(months, 'mes', 'meses')}.
           </p>
         )}
         <button className="btn full mt" type="submit">

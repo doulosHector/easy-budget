@@ -86,3 +86,35 @@ export const isDateKey = (value: string): value is DateKey =>
 
 export const isMonthKey = (value: string): value is MonthKey =>
   /^\d{4}-\d{2}$/.test(value)
+
+/**
+ * Reads a deadline: a `YYYY-MM-DD` date, or a `YYYY-MM` month (the format
+ * used before deadlines had a day), which becomes the month's last day.
+ */
+export const parseDeadline = (value: string): DateKey | null => {
+  if (isDateKey(value)) return value
+  return isMonthKey(value) ? lastDayOfMonth(value) : null
+}
+
+const toDate = (date: DateKey): Date => {
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+/** Compact date, e.g. `15 dic 26`. */
+export const dateShort = (date: DateKey): string =>
+  toDate(date)
+    .toLocaleDateString(LOCALE, {
+      day: 'numeric',
+      month: 'short',
+      year: '2-digit',
+    })
+    .replace(/\./g, '')
+
+/** Full date, e.g. `15 de diciembre de 2026`. */
+export const dateLong = (date: DateKey): string =>
+  toDate(date).toLocaleDateString(LOCALE, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })

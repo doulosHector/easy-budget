@@ -3,12 +3,12 @@ import { paletteColor } from '../constants/palette'
 import type {
   BudgetState,
   Category,
+  DateKey,
   Goal,
   MonthBudget,
-  MonthKey,
 } from '../types'
 import { normalizeHeader, parseCsv, toCsv } from '../utils/csv'
-import { isDateKey, isMonthKey } from '../utils/date'
+import { isDateKey, isMonthKey, parseDeadline } from '../utils/date'
 import { createId } from '../utils/id'
 import { parseAmount } from '../utils/number'
 import { compareExpensesDesc, findCategory } from './budget'
@@ -135,7 +135,7 @@ const findOrCreateCategory = (
 const findOrCreateGoal = (
   draft: BudgetState,
   name: string,
-  details: { target?: number | null; deadline?: MonthKey | null } = {},
+  details: { target?: number | null; deadline?: DateKey | null } = {},
 ): { goal: Goal; created: boolean } => {
   const target = details.target ?? null
   const deadline = details.deadline ?? null
@@ -199,7 +199,7 @@ export const importCsv = (
       const deadlineText = cell(row, deadline)
       const { goal, created: isNew } = findOrCreateGoal(draft, goalName, {
         target: targetValue > 0 ? targetValue : null,
-        deadline: isMonthKey(deadlineText) ? deadlineText : null,
+        deadline: parseDeadline(deadlineText),
       })
       if (isNew) created.add(goal.id)
 

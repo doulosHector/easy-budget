@@ -46,7 +46,7 @@ describe('getGoalsPlanned', () => {
 describe('getGoalSuggestions', () => {
   it('suggests last plan and the amount to finish on time', () => {
     const state = budgetState({
-      goals: [goal({ target: 12000, deadline: '2026-12' })],
+      goals: [goal({ target: 12000, deadline: '2026-12-15' })],
       contributions,
       months: { '2026-08': month({ goals: { 'goal-trip': 2500 } }) },
     })
@@ -59,7 +59,7 @@ describe('getGoalSuggestions', () => {
 
   it('rounds up to cents and asks for everything once the deadline passed', () => {
     const state = budgetState({
-      goals: [goal({ target: 1000, deadline: '2026-11' })],
+      goals: [goal({ target: 1000, deadline: '2026-11-30' })],
     })
     expect(getGoalSuggestions(state, '2026-09', 'goal-trip').onTime).toBe(
       333.34,
@@ -75,9 +75,9 @@ describe('getGoalSuggestions', () => {
 
 describe('monthsLeft', () => {
   it('counts the current month and never returns less than 1', () => {
-    expect(monthsLeft('2026-12', '2026-09')).toBe(4)
-    expect(monthsLeft('2026-09', '2026-09')).toBe(1)
-    expect(monthsLeft('2026-01', '2026-09')).toBe(1)
+    expect(monthsLeft('2026-12-15', '2026-09')).toBe(4)
+    expect(monthsLeft('2026-09-01', '2026-09')).toBe(1)
+    expect(monthsLeft('2026-01-31', '2026-09')).toBe(1)
   })
 })
 

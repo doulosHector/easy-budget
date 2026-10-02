@@ -5,6 +5,7 @@ import {
   isDateKey,
   lastDayOfMonth,
   monthLabel,
+  parseDeadline,
   shiftMonth,
 } from './date'
 
@@ -40,5 +41,13 @@ describe('labels', () => {
   it('validates date keys', () => {
     expect(isDateKey('2026-09-25')).toBe(true)
     expect(isDateKey('25/09/2026')).toBe(false)
+  })
+})
+
+describe('parseDeadline', () => {
+  it('keeps dates and turns months into their last day', () => {
+    expect(parseDeadline('2026-12-15')).toBe('2026-12-15')
+    expect(parseDeadline('2026-12')).toBe('2026-12-31')
+    expect(parseDeadline('dic 2026')).toBeNull()
   })
 })

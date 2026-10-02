@@ -36,7 +36,7 @@ export const goal = (overrides: Partial<Goal> = {}): Goal => ({
   id: 'goal-trip',
   name: 'Viaje',
   target: 12000,
-  deadline: '2026-12',
+  deadline: '2026-12-31',
   icon: 'plane',
   color: '#3B82A0',
   createdAt: 1,

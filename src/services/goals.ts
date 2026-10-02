@@ -91,9 +91,12 @@ export const getGoalMissing = (
           getGoalBalance(contributions, goal.id, firstDayOfMonth(month)),
       )
 
-/** Months left until the deadline, counting `month` itself (at least 1). */
-export const monthsLeft = (deadline: MonthKey, month: MonthKey): number =>
-  Math.max(1, monthsBetween(month, deadline) + 1)
+/**
+ * Months left until the deadline, counting both `month` and the deadline's
+ * month (at least 1).
+ */
+export const monthsLeft = (deadline: DateKey, month: MonthKey): number =>
+  Math.max(1, monthsBetween(month, monthOf(deadline)) + 1)
 
 /** Rounds up to cents, so following the suggestion never falls short. */
 const ceilCents = (amount: number): number => Math.ceil(amount * 100) / 100

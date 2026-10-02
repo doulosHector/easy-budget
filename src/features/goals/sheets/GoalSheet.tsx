@@ -18,9 +18,9 @@ import {
 } from '../../../services/goals'
 import type { Contribution } from '../../../types'
 import {
+  dateLong,
   dayLabel,
   firstDayOfMonth,
-  monthLabel,
   monthName,
   monthOf,
   today,
@@ -119,7 +119,7 @@ export function GoalSheet({ goalId }: { goalId: string }) {
     }`
   }
   if (goal.deadline) {
-    status += ` · para ${monthLabel(goal.deadline).toLowerCase()}`
+    status += ` · para el ${dateLong(goal.deadline)}`
   }
 
   return (
