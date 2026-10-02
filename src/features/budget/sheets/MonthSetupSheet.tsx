@@ -18,6 +18,7 @@ import { goalSuggestionOptions } from '../../goals'
 import { monthLabel, shiftMonth } from '../../../utils/date'
 import { formatMoney } from '../../../utils/format'
 import { parseAmount, sum, toInputValue } from '../../../utils/number'
+import { cx } from '../../../utils/style'
 import { SuggestionChips } from '../../../components/SuggestionChips'
 import { categorySuggestionOptions } from '../suggestions'
 import '../budget.css'
@@ -80,6 +81,8 @@ export function MonthSetupSheet() {
   const assigned =
     sum(Object.values(budgets).map(parseAmount)) +
     sum(Object.values(plans).map(parseAmount))
+
+  const over = assigned > availableAmount
 
   const setBudget = (categoryId: string, value: string) =>
     setBudgets((current) => ({ ...current, [categoryId]: value }))
@@ -144,6 +147,24 @@ export function MonthSetupSheet() {
               Mes pasado <b>{formatMoney(previous.available)}</b>
             </button>
           </div>
+        )}
+
+        <div className="setup-totals" aria-live="polite">
+          <span>
+            Asignado<b>{formatMoney(assigned)}</b>
+          </span>
+          <span>
+            {over ? 'Te excedes por' : 'Sin asignar'}
+            <b className={cx(over && 'text-danger')}>
+              {formatMoney(Math.abs(availableAmount - assigned))}
+            </b>
+          </span>
+        </div>
+        {withdrawn > 0 && (
+          <p className="hint setup-note">
+            El disponible incluye {formatMoney(withdrawn)} que retiraste de tus
+            metas este mes.
+          </p>
         )}
 
         <div className="sec-title">
@@ -230,27 +251,6 @@ export function MonthSetupSheet() {
           </>
         )}
 
-        <p className="summary">
-          Asignado <b>{formatMoney(assigned)}</b> de{' '}
-          <b>{formatMoney(availableAmount)}</b>
-          {assigned > availableAmount && availableAmount > 0 ? (
-            <>
-              {' · '}
-              <span className="text-danger">
-                te excedes por {formatMoney(assigned - availableAmount)}
-              </span>
-            </>
-          ) : (
-            availableAmount > 0 &&
-            ` · quedan ${formatMoney(availableAmount - assigned)} sin asignar`
-          )}
-        </p>
-        {withdrawn > 0 && (
-          <p className="hint">
-            El disponible incluye {formatMoney(withdrawn)} que retiraste de tus
-            metas este mes.
-          </p>
-        )}
         <button className="btn full mt" type="submit">
           Guardar mes
         </button>

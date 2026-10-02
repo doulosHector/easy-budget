@@ -224,3 +224,28 @@
 .chips.apply-all {
   margin-bottom: 6px;
 }
+
+/* Month setup totals, right below the available money */
+.setup-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: var(--surface2);
+  font-size: 13px;
+  color: var(--muted);
+}
+.setup-totals b {
+  display: block;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 800;
+}
+.setup-totals b.text-danger {
+  color: var(--danger);
+}
+.setup-note {
+  margin-top: 8px;
+}
