@@ -34,10 +34,14 @@ export function BudgetHero() {
 
   return (
     <section className="hero">
-      <p className="hero-label">{left < 0 ? 'Te pasaste por' : 'Te quedan'}</p>
-      <p className={cx('hero-amount', left < 0 && 'neg')}>
-        {formatMoney(Math.abs(left))}
-      </p>
+      <div className="hero-head">
+        <h2 className="hero-label">Resumen</h2>
+        {available > 0 && (
+          <span className={cx('hero-percent', used > available && 'neg')}>
+            {Math.round(percentOf(used))}% usado
+          </span>
+        )}
+      </div>
       <StackedBar
         over={used > available}
         segments={[
@@ -53,11 +57,15 @@ export function BudgetHero() {
           )}
         </span>
         <span>
-          Asignado<b>{formatMoney(assigned)}</b>
-        </span>
-        <span>
           <i className="dot spent" aria-hidden="true" />
           Gastado<b>{formatMoney(spent)}</b>
+        </span>
+        <span>
+          Restante
+          <b className={cx(left < 0 && 'neg')}>
+            {left < 0 ? '−' : ''}
+            {formatMoney(Math.abs(left))}
+          </b>
         </span>
         <span>
           <i className="dot save" aria-hidden="true" />

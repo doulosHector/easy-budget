@@ -6,19 +6,25 @@
   padding: 20px 18px 16px;
   margin-bottom: 18px;
 }
+.hero-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
 .hero-label {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 500;
-}
-.hero-amount {
-  font-size: 40px;
+  font-size: 17px;
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin: 2px 0 14px;
+  letter-spacing: -0.01em;
 }
-.hero-amount.neg {
+.hero-percent {
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+.hero-percent.neg,
+.hero-meta b.neg {
   color: var(--danger);
 }
 .hero-meta {
