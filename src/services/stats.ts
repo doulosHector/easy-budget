@@ -119,16 +119,27 @@ export interface CategoryAverage {
   total: number
   /** Number of months (within the window) with at least one expense. */
   activeMonths: number
+  /** `total` divided by `activeMonths`. */
+  average: number
 }
 
 export interface MonthlyAverages {
   /** Months in the window, oldest first, ending with the reference month. */
   months: MonthKey[]
   total: number
+  /** Months in the window with any expense. */
+  activeMonths: number
+  /** `total` divided by `activeMonths`, or 0 without expenses. */
+  average: number
+  /** Highest average first. */
   rows: CategoryAverage[]
 }
 
-/** Spending per category over the `span` months ending at `month`. */
+/**
+ * Spending per category over the `span` months ending at `month`. Averages
+ * only count the months that had spending (in that category, or at all for
+ * the overall average), so a month without expenses does not pull them down.
+ */
 export const getMonthlyAverages = (
   categories: readonly Category[],
   expenses: readonly Expense[],
@@ -140,6 +151,7 @@ export const getMonthlyAverages = (
   )
   const window = new Set(months)
   const byCategory = new Map<string, { total: number; months: Set<string> }>()
+  const activeMonths = new Set<MonthKey>()
   let total = 0
   for (const expense of expenses) {
     const expenseMonth = monthOf(expense.date)
@@ -151,17 +163,31 @@ export const getMonthlyAverages = (
     entry.total += expense.amount
     entry.months.add(expenseMonth)
     byCategory.set(expense.categoryId, entry)
+    activeMonths.add(expenseMonth)
     total += expense.amount
   }
   const rows = categories
     .flatMap((category) => {
       const entry = byCategory.get(category.id)
       return entry
-        ? [{ category, total: entry.total, activeMonths: entry.months.size }]
+        ? [
+            {
+              category,
+              total: entry.total,
+              activeMonths: entry.months.size,
+              average: entry.total / entry.months.size,
+            },
+          ]
         : []
     })
-    .sort((a, b) => b.total - a.total)
-  return { months, total, rows }
+    .sort((a, b) => b.average - a.average)
+  return {
+    months,
+    total,
+    activeMonths: activeMonths.size,
+    average: activeMonths.size ? total / activeMonths.size : 0,
+    rows,
+  }
 }
 
 export interface SavingsSummary {

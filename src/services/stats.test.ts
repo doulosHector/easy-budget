@@ -70,21 +70,28 @@ describe('getTopConcepts', () => {
 })
 
 describe('getMonthlyAverages', () => {
-  it('aggregates the last 12 months per category', () => {
+  it('averages each category over its months with spending only', () => {
+    const home = category({ id: 'cat-home', name: 'Casa' })
     const result = getMonthlyAverages(
-      [category()],
+      [category(), home],
       [
         expense({ amount: 100, date: '2025-10-01' }),
         expense({ amount: 200, date: '2026-09-01' }),
+        expense({ amount: 50, date: '2026-09-15' }),
+        expense({ amount: 900, date: '2026-03-01', categoryId: 'cat-home' }),
         expense({ amount: 999, date: '2025-09-30' }),
       ],
       '2026-09',
     )
     expect(result.months[0]).toBe('2025-10')
     expect(result.months).toHaveLength(12)
-    expect(result.total).toBe(300)
+    expect(result.total).toBe(1250)
+    // Overall: 3 months with spending (Oct, Mar and Sep), not 12.
+    expect(result.activeMonths).toBe(3)
+    expect(result.average).toBeCloseTo(1250 / 3)
     expect(result.rows).toEqual([
-      { category: category(), total: 300, activeMonths: 2 },
+      { category: home, total: 900, activeMonths: 1, average: 900 },
+      { category: category(), total: 350, activeMonths: 2, average: 175 },
     ])
   })
 })

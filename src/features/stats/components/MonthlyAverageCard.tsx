@@ -8,7 +8,7 @@ export function MonthlyAverageCard({
 }: {
   averages: MonthlyAverages
 }) {
-  const { months, total, rows } = averages
+  const { months, total, activeMonths, average, rows } = averages
   const span = months.length
 
   return (
@@ -18,13 +18,14 @@ export function MonthlyAverageCard({
         <small>
           Últimos {span} meses ({monthShort(months[0])} –{' '}
           {monthShort(months[span - 1])}) · total {formatMoney(total)} ·{' '}
-          {formatMoney(total / span)} al mes
+          {formatMoney(average)} al mes en {activeMonths}{' '}
+          {pluralize(activeMonths, 'mes', 'meses')} con gasto
         </small>
       </h3>
       {rows.length ? (
         <table className="tbl">
           <tbody>
-            {rows.map(({ category, total, activeMonths }) => (
+            {rows.map(({ category, total, activeMonths, average }) => (
               <tr key={category.id}>
                 <td>
                   <div className="name">
@@ -39,7 +40,7 @@ export function MonthlyAverageCard({
                   </div>
                 </td>
                 <td>
-                  {formatMoney(total / span)}
+                  {formatMoney(average)}
                   <small>{formatMoney(total)} en total</small>
                 </td>
               </tr>
