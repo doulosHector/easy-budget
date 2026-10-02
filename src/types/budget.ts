@@ -33,6 +33,13 @@ export interface Goal {
   target: number | null
   /** Day the target should be reached by, if any. */
   deadline: DateKey | null
+  /**
+   * Money the goal already had outside its recorded contributions, e.g.
+   * savings from before the goal was created. Part of the balance, but not
+   * of any month's savings. Negative after lowering the current saving
+   * below what the contributions add up to.
+   */
+  startingBalance: number
   icon: CategoryIconName
   color: string
   createdAt: number

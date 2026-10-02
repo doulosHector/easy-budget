@@ -39,7 +39,7 @@ export const findGoal = (
 ): Goal | undefined => goals.find((g) => g.id === id)
 
 /** Sum of a goal's contributions, optionally only those before `before`. */
-export const getGoalBalance = (
+export const getContributionsTotal = (
   contributions: readonly Contribution[],
   goalId: string,
   before?: DateKey,
@@ -49,6 +49,17 @@ export const getGoalBalance = (
       .filter((c) => c.goalId === goalId && (!before || c.date < before))
       .map((c) => c.amount),
   )
+
+/**
+ * Money in a goal: its starting balance plus its contributions, optionally
+ * only those before `before`.
+ */
+export const getGoalBalance = (
+  contributions: readonly Contribution[],
+  goal: Goal,
+  before?: DateKey,
+): number =>
+  goal.startingBalance + getContributionsTotal(contributions, goal.id, before)
 
 export const getSavings = (
   contributions: readonly Contribution[],
@@ -88,7 +99,7 @@ export const getGoalMissing = (
     : Math.max(
         0,
         goal.target -
-          getGoalBalance(contributions, goal.id, firstDayOfMonth(month)),
+          getGoalBalance(contributions, goal, firstDayOfMonth(month)),
       )
 
 /**

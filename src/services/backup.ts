@@ -32,7 +32,11 @@ const GOAL_HEADERS = [
 /** Values of the `tipo` column in the budgets file. */
 const BUDGET_KIND = { category: 'categoria', goal: 'meta' } as const
 /** Values of the `tipo` column in the goals file. */
-const MOVEMENT_KIND = { in: 'aportacion', out: 'retiro' } as const
+const MOVEMENT_KIND = {
+  in: 'aportacion',
+  out: 'retiro',
+  starting: 'saldo_inicial',
+} as const
 
 const money = (amount: number | null): string =>
   amount == null ? '' : amount.toFixed(2)
@@ -80,15 +84,25 @@ export const exportBudgetsCsv = (state: BudgetState): string => {
 
 /**
  * One row per goal movement, oldest first, with `monto` always positive and
- * `tipo` telling contributions from withdrawals. A goal without movements
- * still gets one row, so it is not lost.
+ * `tipo` telling contributions from withdrawals. A starting balance goes
+ * first, as a `saldo_inicial` row without a date. A goal with neither still
+ * gets one row, so it is not lost.
  */
 export const exportGoalsCsv = (state: BudgetState): string => {
   const rows: string[][] = [GOAL_HEADERS]
   for (const goal of state.goals) {
     const prefix = [goal.name, money(goal.target), goal.deadline ?? '']
     const history = getGoalHistory(state.contributions, goal.id).reverse()
-    if (!history.length) rows.push([...prefix, '', '', ''])
+    if (goal.startingBalance) {
+      rows.push([
+        ...prefix,
+        '',
+        MOVEMENT_KIND.starting,
+        money(goal.startingBalance),
+      ])
+    } else if (!history.length) {
+      rows.push([...prefix, '', '', ''])
+    }
     for (const { date, amount } of history) {
       rows.push([
         ...prefix,
@@ -152,6 +166,7 @@ const findOrCreateGoal = (
     name,
     target,
     deadline,
+    startingBalance: 0,
     icon: DEFAULT_GOAL_ICON,
     color: paletteColor(draft.goals.length),
     createdAt: Date.now(),
@@ -205,10 +220,15 @@ export const importCsv = (
 
       const movementDate = cell(row, date)
       const amountText = cell(row, amount)
+      const movementKind = normalizeHeader(cell(row, kind))
+      // Setting (not adding) keeps importing the same file idempotent.
+      if (movementKind === MOVEMENT_KIND.starting) {
+        goal.startingBalance = parseAmount(amountText)
+        continue
+      }
       // A row without a movement only carries the goal itself.
       if (!movementDate && !amountText) continue
       const value = parseAmount(amountText)
-      const movementKind = normalizeHeader(cell(row, kind))
       if (
         !isDateKey(movementDate) ||
         value <= 0 ||

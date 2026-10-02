@@ -13,7 +13,7 @@ import { paletteColor } from '../../../constants/palette'
 import { useBudget } from '../../../context/budget'
 import { useToast } from '../../../context/toast'
 import { useUi } from '../../../context/ui'
-import { findGoal } from '../../../services/goals'
+import { findGoal, getContributionsTotal } from '../../../services/goals'
 import { isDateKey, monthLabel } from '../../../utils/date'
 import { pluralize } from '../../../utils/format'
 import { parseAmount, toInputValue } from '../../../utils/number'
@@ -31,6 +31,14 @@ export function GoalFormSheet({ goalId }: { goalId: string | null }) {
     existing?.target != null ? toInputValue(existing.target) : '',
   )
   const [deadline, setDeadline] = useState(existing?.deadline ?? '')
+  const contributionsTotal = existing
+    ? getContributionsTotal(state.contributions, existing.id)
+    : 0
+  // The field shows (and sets) the whole balance, not the starting part.
+  const [saving, setSaving] = useState(() => {
+    const balance = existing ? existing.startingBalance + contributionsTotal : 0
+    return balance ? toInputValue(balance) : ''
+  })
   const [icon, setIcon] = useState<CategoryIconName>(
     existing?.icon ?? DEFAULT_GOAL_ICON,
   )
@@ -57,11 +65,17 @@ export function GoalFormSheet({ goalId }: { goalId: string | null }) {
       showToast('Elige una fecha límite válida')
       return
     }
+    const savingAmount = parseAmount(saving)
+    if (savingAmount < 0) {
+      showToast('El ahorro actual no puede ser negativo')
+      return
+    }
     const targetAmount = parseAmount(target)
     const changes = {
       name: trimmed,
       target: targetAmount > 0 ? targetAmount : null,
       deadline: deadline || null,
+      startingBalance: savingAmount - contributionsTotal,
       icon,
       color,
     }
@@ -125,9 +139,23 @@ export function GoalFormSheet({ goalId }: { goalId: string | null }) {
             />
           </label>
         </div>
+        <label className="field">
+          <span>Ahorro actual</span>
+          <input
+            className="input"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0"
+            placeholder="$0.00"
+            value={saving}
+            onChange={(e) => setSaving(e.target.value)}
+          />
+        </label>
         <p className="hint goal-form-hint">
-          Ambos son opcionales. Con los dos, te sugerimos cuánto apartar cada
-          mes para llegar a tiempo.
+          Todo es opcional. El ahorro actual es lo que ya tienes guardado para
+          esta meta: suma a su saldo, pero no cuenta como ahorro de este mes.
+          Con objetivo y fecha límite te sugerimos cuánto apartar cada mes.
         </p>
         <AppearanceFields
           icon={icon}

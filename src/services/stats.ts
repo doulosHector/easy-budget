@@ -187,7 +187,9 @@ export const getSavingsSummary = (
     saved,
     withdrawn,
     planned: getGoalsPlanned(state, month),
-    total: sum(state.contributions.map((c) => c.amount)),
+    total:
+      sum(state.goals.map((g) => g.startingBalance)) +
+      sum(state.contributions.map((c) => c.amount)),
     savedPercent:
       configured != null && available > 0
         ? Math.round((saved / available) * 100)

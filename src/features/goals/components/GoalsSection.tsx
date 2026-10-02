@@ -34,7 +34,7 @@ export function GoalsSection() {
             <li key={goal.id}>
               <GoalCard
                 goal={goal}
-                balance={getGoalBalance(contributions, goal.id)}
+                balance={getGoalBalance(contributions, goal)}
                 plan={getGoalPlan(state, month, goal.id)}
                 net={savings.byGoal[goal.id] ?? 0}
                 onSelect={() => openSheet({ type: 'goal', goalId: goal.id })}

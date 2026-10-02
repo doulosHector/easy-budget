@@ -18,8 +18,15 @@ const contributions = [
 
 describe('getGoalBalance', () => {
   it('sums all movements, or only those before a date', () => {
-    expect(getGoalBalance(contributions, 'goal-trip')).toBe(3600)
-    expect(getGoalBalance(contributions, 'goal-trip', '2026-09-01')).toBe(3000)
+    expect(getGoalBalance(contributions, goal())).toBe(3600)
+    expect(getGoalBalance(contributions, goal(), '2026-09-01')).toBe(3000)
+  })
+
+  it('adds the starting balance, which never counts as monthly savings', () => {
+    const withStart = goal({ startingBalance: 500 })
+    expect(getGoalBalance(contributions, withStart)).toBe(4100)
+    expect(getGoalBalance([], withStart, '2026-01-01')).toBe(500)
+    expect(getSavings([], '2026-09').saved).toBe(0)
   })
 })
 
@@ -65,6 +72,14 @@ describe('getGoalSuggestions', () => {
       333.34,
     )
     expect(getGoalSuggestions(state, '2027-01', 'goal-trip').onTime).toBe(1000)
+  })
+
+  it('counts the starting balance as already saved', () => {
+    const state = budgetState({
+      goals: [goal({ target: 1000, startingBalance: 400 })],
+    })
+    // 600 missing over Sep, Oct, Nov and Dec.
+    expect(getGoalSuggestions(state, '2026-09', 'goal-trip').onTime).toBe(150)
   })
 
   it('has no on-time amount without target or deadline', () => {

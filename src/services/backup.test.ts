@@ -190,4 +190,16 @@ describe('goals CSV', () => {
     const { state: imported } = importCsv(budgetState(), csv)
     expect(imported.goals[0].deadline).toBe('2027-06-30')
   })
+
+  it('round-trips a starting balance without adding it twice', () => {
+    const start = budgetState({ goals: [goal({ startingBalance: 2500 })] })
+    const csv = exportGoalsCsv(start)
+    expect(lines(csv)[1]).toBe(
+      'Viaje,12000.00,2026-12-31,,saldo_inicial,2500.00',
+    )
+    const once = importCsv(budgetState(), csv).state
+    const twice = importCsv(once, csv).state
+    expect(twice.goals.map((g) => g.startingBalance)).toEqual([2500])
+    expect(twice.contributions).toEqual([])
+  })
 })

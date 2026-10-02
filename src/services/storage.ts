@@ -66,6 +66,9 @@ const toGoal = (raw: unknown, index: number): Goal | null => {
     target: isFiniteNumber(raw.target) && raw.target > 0 ? raw.target : null,
     deadline:
       typeof raw.deadline === 'string' ? parseDeadline(raw.deadline) : null,
+    startingBalance: isFiniteNumber(raw.startingBalance)
+      ? raw.startingBalance
+      : 0,
     icon: isCategoryIconName(raw.icon) ? raw.icon : DEFAULT_GOAL_ICON,
     color: typeof raw.color === 'string' ? raw.color : paletteColor(index),
     createdAt: isFiniteNumber(raw.createdAt) ? raw.createdAt : 0,

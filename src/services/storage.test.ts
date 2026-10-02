@@ -87,6 +87,7 @@ describe('normalizeState with savings goals', () => {
         name: 'Viaje',
         target: null,
         deadline: null,
+        startingBalance: 0,
         icon: 'target',
         color: '#3B82A0',
         createdAt: 0,

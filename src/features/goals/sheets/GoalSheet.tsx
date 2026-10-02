@@ -48,7 +48,7 @@ export function GoalSheet({ goalId }: { goalId: string }) {
 
   const { contributions } = state
   const goal = findGoal(state.goals, goalId)
-  const balance = getGoalBalance(contributions, goalId)
+  const balance = goal ? getGoalBalance(contributions, goal) : 0
   const plan = getGoalPlan(state, month, goalId)
   const net = getSavings(contributions, month).byGoal[goalId] ?? 0
   const history = useMemo(
