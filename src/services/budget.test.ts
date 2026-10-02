@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { budgetState, expense, month } from '../test/factories'
+import { budgetState, category, expense, month } from '../test/factories'
 import {
   filterExpenses,
   getAssignedTotal,
   getRecentConcepts,
   getSpending,
   getSuggestions,
+  sortByExpenseCount,
 } from './budget'
 
 describe('getSpending', () => {
@@ -18,7 +19,29 @@ describe('getSpending', () => {
     expect(getSpending(expenses, '2026-09')).toEqual({
       total: 150,
       byCategory: { 'cat-food': 100, other: 50 },
+      countByCategory: { 'cat-food': 1, other: 1 },
     })
+  })
+})
+
+describe('sortByExpenseCount', () => {
+  it('puts the categories with more expenses first, keeping ties in order', () => {
+    const categories = ['a', 'b', 'c', 'd'].map((id) => category({ id }))
+    const spending = getSpending(
+      [
+        expense({ categoryId: 'c' }),
+        expense({ categoryId: 'c' }),
+        expense({ categoryId: 'b' }),
+        expense({ categoryId: 'd' }),
+      ],
+      '2026-09',
+    )
+    expect(sortByExpenseCount(categories, spending).map((c) => c.id)).toEqual([
+      'c',
+      'b',
+      'd',
+      'a',
+    ])
   })
 })
 

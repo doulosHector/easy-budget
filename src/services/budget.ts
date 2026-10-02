@@ -17,6 +17,8 @@ const EMPTY_MONTH: MonthBudget = Object.freeze({
 
 export interface Spending {
   byCategory: Record<string, number>
+  /** Number of expenses per category id. */
+  countByCategory: Record<string, number>
   total: number
 }
 
@@ -50,15 +52,27 @@ export const getSpending = (
   month: MonthKey,
 ): Spending => {
   const byCategory: Record<string, number> = {}
+  const countByCategory: Record<string, number> = {}
   let total = 0
-  for (const expense of expenses) {
-    if (monthOf(expense.date) !== month) continue
-    byCategory[expense.categoryId] =
-      (byCategory[expense.categoryId] ?? 0) + expense.amount
-    total += expense.amount
+  for (const { categoryId, amount, date } of expenses) {
+    if (monthOf(date) !== month) continue
+    byCategory[categoryId] = (byCategory[categoryId] ?? 0) + amount
+    countByCategory[categoryId] = (countByCategory[categoryId] ?? 0) + 1
+    total += amount
   }
-  return { byCategory, total }
+  return { byCategory, countByCategory, total }
 }
+
+/** Categories with the most expenses first; ties keep their order. */
+export const sortByExpenseCount = (
+  categories: readonly Category[],
+  spending: Spending,
+): Category[] =>
+  [...categories].sort(
+    (a, b) =>
+      (spending.countByCategory[b.id] ?? 0) -
+      (spending.countByCategory[a.id] ?? 0),
+  )
 
 /** Sum of the budgets assigned to existing categories in a month. */
 export const getAssignedTotal = (state: BudgetState, month: MonthKey): number =>

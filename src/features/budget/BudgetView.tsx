@@ -2,7 +2,8 @@ import { EmptyState, Icon } from '../../components/ui'
 import { useBudget } from '../../context/budget'
 import { useUi } from '../../context/ui'
 import { useSpending } from '../../hooks/useSpending'
-import { getCategoryBudget } from '../../services/budget'
+import { useMemo } from 'react'
+import { getCategoryBudget, sortByExpenseCount } from '../../services/budget'
 import { GoalsSection } from '../goals'
 import { BudgetHero } from './components/BudgetHero'
 import { CategoryCard } from './components/CategoryCard'
@@ -12,6 +13,10 @@ export function BudgetView() {
   const { state } = useBudget()
   const { month, openSheet } = useUi()
   const spending = useSpending(month)
+  const categories = useMemo(
+    () => sortByExpenseCount(state.categories, spending),
+    [state.categories, spending],
+  )
 
   return (
     <>
@@ -21,13 +26,14 @@ export function BudgetView() {
         <span className="hint">Toca una para registrar un gasto</span>
       </div>
       <ul className="cats">
-        {state.categories.length ? (
-          state.categories.map((category) => (
+        {categories.length ? (
+          categories.map((category) => (
             <li key={category.id}>
               <CategoryCard
                 category={category}
                 budget={getCategoryBudget(state, month, category.id)}
                 spent={spending.byCategory[category.id] ?? 0}
+                count={spending.countByCategory[category.id] ?? 0}
                 onSelect={() =>
                   openSheet({ type: 'category', categoryId: category.id })
                 }

@@ -1,12 +1,14 @@
 import { CategoryIcon, ProgressBar } from '../../../components/ui'
 import type { Category } from '../../../types'
-import { formatMoney } from '../../../utils/format'
+import { formatMoney, pluralize } from '../../../utils/format'
 import { cx } from '../../../utils/style'
 
 interface CategoryCardProps {
   category: Category
   budget: number
   spent: number
+  /** Number of expenses in the month. */
+  count: number
   onSelect: () => void
 }
 
@@ -14,6 +16,7 @@ export function CategoryCard({
   category,
   budget,
   spent,
+  count,
   onSelect,
 }: CategoryCardProps) {
   const hasBudget = budget > 0
@@ -32,7 +35,15 @@ export function CategoryCard({
       <CategoryIcon category={category} />
       <span className="cat-body">
         <span className="cat-top">
-          <span className="cat-name">{category.name}</span>
+          <span className="cat-title">
+            <span className="cat-name">{category.name}</span>
+            <span
+              className={cx('cat-count', count === 0 && 'zero')}
+              aria-label={`${count} ${pluralize(count, 'gasto')}`}
+            >
+              {count}
+            </span>
+          </span>
           <span className={cx('cat-left', over && 'over')}>{amount}</span>
         </span>
         <ProgressBar small value={percent} over={over} color={category.color} />
