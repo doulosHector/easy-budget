@@ -9,10 +9,13 @@ backend and no account.
 
 ## Features
 
-- **Budget**: money available per month, budget per category, progress
-  bars, overspend warnings and suggestions (last month, 3-month average,
-  last month's remainder).
-- **Savings goals**: goals with an optional target and deadline,
+- **Budget**: money available per month, budget per category, a private
+  month summary (no big balance on screen), categories ordered by number of
+  expenses, progress bars, overspend warnings and suggestions (last month,
+  3-month average, last month's remainder).
+- **Savings goals**: goals with an optional target, deadline date and
+  current saving (a starting balance that doesn't count as this month's
+  savings),
   contributions and withdrawals, a monthly plan per goal with suggestions
   (last month's plan, and the amount that reaches the target on time).
   Saving uses the month's money without counting as spending; a withdrawal
@@ -20,7 +23,8 @@ backend and no account.
 - **Expenses**: quick entry from each category, search by concept, filter
   by category and date range, edit and delete.
 - **Statistics**: month summary vs. previous month, spending by category,
-  daily chart, top concepts, 12-month average per category and savings.
+  daily chart, top concepts, monthly average per category (over the months
+  with spending in the last 12) and savings.
 - **Settings**: light/dark/system theme, CSV export/import (expenses,
   budgets and goals) and data reset. Deleting asks for a second tap.
 - **PWA**: installable, works offline, updates automatically.
